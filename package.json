@@ -1,0 +1,60 @@
+{
+  "name": "vscode-rpg-folding",
+  "displayName": "RPG/RPGLE Block Folding",
+  "description": "Extension that recognizes and makes foldable logic blocks in RPG and RPGLE, such as IF/ENDIF (all types of IF), DO/ENDDO, BEGSR/ENDSR, and more.",
+  "version": "0.0.1",
+  "publisher": "Chri-Masi",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onLanguage:rpg",
+    "onLanguage:rpgle"
+  ],
+  "contributes": {
+  "languages": [
+      {
+        "id": "rpg",
+    "aliases": ["RPG", "RPG fixed"],
+    "extensions": [".rpg", ".rpgf", ".rpg_fix"]
+      },
+      {
+        "id": "rpgle",
+    "aliases": ["RPGLE", "RPG IV"],
+    "extensions": [".rpgle", ".sqlrpgle", ".rpg4"]
+      }
+    ],
+    "configuration": {
+      "title": "RPG Folding",
+      "properties": {
+        "rpgFolding.enableFreeFormFallback": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable free-form fallback, deprecated use another extension for free-form RPGLE folding."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.4.0",
+    "vsce": "^2.15.0"
+  }
+  ,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ChriMasi/RPG-Folding"
+  }
+}

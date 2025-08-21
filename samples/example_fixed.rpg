@@ -1,0 +1,10 @@
+     F****************************************************************
+      * Simple fixed-format sample demonstrating folding
+      C                   IF        Cond1
+      C                   ELSEIF    Cond2
+      C                   ELSE
+      C                   ENDIF
+      C                   DO        i = 1 to 10
+      C                   ENDDO
+      C                   FOR       j = 1 to 5
+      C                   ENDFOR
