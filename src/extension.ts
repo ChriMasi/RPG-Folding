@@ -2,6 +2,13 @@ import * as vscode from 'vscode';
 
 interface PinnedBlock { start: number; end: number; elseLines: number[] }
 
+const KEYWORD_COLUMN_INDEX = 25; // column 26 in 1-based indexing
+
+function getColumn26Setting(): boolean {
+  const cfg = vscode.workspace.getConfiguration('rpgFolding');
+  return cfg.get<boolean>('highlight.onlyColumn26', true);
+}
+
 export function activate(context: vscode.ExtensionContext) {
   const selector: vscode.DocumentSelector = [
     { language: 'rpg' },
@@ -296,66 +303,76 @@ class RpgHighlighter implements vscode.Disposable {
 
     const patterns = buildPatterns(true);
 
-    const blockRanges: vscode.Range[] = [];
-    const elseRanges: vscode.Range[] = [];
-    const callRanges: vscode.Range[] = [];
+  const blockRanges: vscode.Range[] = [];
+  const elseRanges: vscode.Range[] = [];
+  const callRanges: vscode.Range[] = [];
 
-    interface Block { type: string; start: number; }
+  interface Block { type: string; start: number; colorable: boolean; }
     const stack: Block[] = [];
 
+    const onlyCol26 = getColumn26Setting();
     for (let i = 0; i < lines.length; i++) {
       const raw = lines[i];
       const lineText = stripCommentsAndSequence(raw).trim().toLowerCase();
       if (!lineText) continue;
 
       // Evidenzia CALL/CALLP (solo parola chiave, non blocco)
-      const callMatch = findKeywordRange(raw, /\bcallp?\b/i);
+      const callMatch = findKeywordRange(raw, /\bcallp?\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
       if (callMatch) callRanges.push(new vscode.Range(i, callMatch.start.character, i, callMatch.end.character));
 
       if (patterns.if.test(lineText)) {
-        stack.push({ type: 'if', start: i });
-        const kwRange = findKeywordRange(raw, /\bif(?:eq|ne|gt|ge|lt|le)?\b/i);
+        const kwRange = findKeywordRange(raw, /\bif(?:eq|ne|gt|ge|lt|le)?\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
+        const colorable = !!kwRange;
+        stack.push({ type: 'if', start: i, colorable });
         if (kwRange) blockRanges.push(new vscode.Range(i, kwRange.start.character, i, kwRange.end.character));
         continue;
       }
       if (patterns.do.test(lineText) || patterns.dow.test(lineText) || patterns.dou.test(lineText)) {
-        stack.push({ type: 'do', start: i });
-        const kwRange = findKeywordRange(raw, /\bdo\b|\bdow\b|\bdou\b/i);
+        const kwRange = findKeywordRange(raw, /\bdo\b|\bdow\b|\bdou\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
+        const colorable = !!kwRange;
+        stack.push({ type: 'do', start: i, colorable });
         if (kwRange) blockRanges.push(new vscode.Range(i, kwRange.start.character, i, kwRange.end.character));
         continue;
       }
       if (patterns.for.test(lineText)) {
-        stack.push({ type: 'for', start: i });
-        const kwRange = findKeywordRange(raw, /\bfor\b/i);
+        const kwRange = findKeywordRange(raw, /\bfor\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
+        const colorable = !!kwRange;
+        stack.push({ type: 'for', start: i, colorable });
         if (kwRange) blockRanges.push(new vscode.Range(i, kwRange.start.character, i, kwRange.end.character));
         continue;
       }
       if (patterns.select && patterns.select.test(lineText)) {
-        stack.push({ type: 'select', start: i });
-        const kwRange = findKeywordRange(raw, /\bselect\b|\bcase(?:eq|ne|gt|ge|lt|le)?\b/i);
+        const kwRange = findKeywordRange(raw, /\bselect\b|\bcase(?:eq|ne|gt|ge|lt|le)?\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
+        const colorable = !!kwRange;
+        stack.push({ type: 'select', start: i, colorable });
         if (kwRange) blockRanges.push(new vscode.Range(i, kwRange.start.character, i, kwRange.end.character));
         continue;
       }
       if (patterns.begsr && patterns.begsr.test(lineText)) {
-        stack.push({ type: 'sr', start: i });
-        const kwRange = findKeywordRange(raw, /\bBEGSR\b/i);
+        const kwRange = findKeywordRange(raw, /\bBEGSR\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
+        const colorable = !!kwRange;
+        stack.push({ type: 'sr', start: i, colorable });
         if (kwRange) blockRanges.push(new vscode.Range(i, kwRange.start.character, i, kwRange.end.character));
         continue;
       }
 
       if (patterns.elseif.test(lineText) || patterns.else.test(lineText) || /\bx\d{2}\b/.test(lineText)) {
-        for (let s = stack.length - 1; s >= 0; s--) {
-          if (stack[s].type === 'if') {
-            const kwRange = findKeywordRange(raw, /\belseif\b|\belse\b|\bx\d{2}\b/i);
-            if (kwRange) elseRanges.push(new vscode.Range(i, kwRange.start.character, i, kwRange.end.character));
-            break;
+        const kwRange = findKeywordRange(raw, /\belseif\b|\belse\b|\bx\d{2}\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
+        if (kwRange) {
+          for (let s = stack.length - 1; s >= 0; s--) {
+            if (stack[s].type === 'if') {
+              if (stack[s].colorable) {
+                elseRanges.push(new vscode.Range(i, kwRange.start.character, i, kwRange.end.character));
+              }
+              break;
+            }
           }
         }
         continue;
       }
 
       if (patterns.endif.test(lineText)) {
-        const kwRange = findKeywordRange(raw, /\bendif\b/i);
+        const kwRange = findKeywordRange(raw, /\bendif\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
         if (kwRange) blockRanges.push(new vscode.Range(i, kwRange.start.character, i, kwRange.end.character));
         for (let s = stack.length - 1; s >= 0; s--) {
           if (stack[s].type === 'if') { stack.splice(s, 1); break; }
@@ -363,7 +380,7 @@ class RpgHighlighter implements vscode.Disposable {
         continue;
       }
       if (patterns.enddo.test(lineText)) {
-        const kwRange = findKeywordRange(raw, /\benddo\b/i);
+        const kwRange = findKeywordRange(raw, /\benddo\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
         if (kwRange) blockRanges.push(new vscode.Range(i, kwRange.start.character, i, kwRange.end.character));
         for (let s = stack.length - 1; s >= 0; s--) {
           if (stack[s].type === 'do') { stack.splice(s, 1); break; }
@@ -371,7 +388,7 @@ class RpgHighlighter implements vscode.Disposable {
         continue;
       }
       if (patterns.endfor.test(lineText)) {
-        const kwRange = findKeywordRange(raw, /\bendfor\b/i);
+        const kwRange = findKeywordRange(raw, /\bendfor\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
         if (kwRange) blockRanges.push(new vscode.Range(i, kwRange.start.character, i, kwRange.end.character));
         for (let s = stack.length - 1; s >= 0; s--) {
           if (stack[s].type === 'for') { stack.splice(s, 1); break; }
@@ -379,7 +396,7 @@ class RpgHighlighter implements vscode.Disposable {
         continue;
       }
       if (patterns.endsl && patterns.endsl.test(lineText)) {
-        const kwRange = findKeywordRange(raw, /\bendsl\b|\bendcs\b/i);
+        const kwRange = findKeywordRange(raw, /\bendsl\b|\bendcs\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
         if (kwRange) blockRanges.push(new vscode.Range(i, kwRange.start.character, i, kwRange.end.character));
         for (let s = stack.length - 1; s >= 0; s--) {
           if (stack[s].type === 'select') { stack.splice(s, 1); break; }
@@ -387,7 +404,7 @@ class RpgHighlighter implements vscode.Disposable {
         continue;
       }
       if (patterns.endsr && patterns.endsr.test(lineText)) {
-        const kwRange = findKeywordRange(raw, /\bendsr\b/i);
+        const kwRange = findKeywordRange(raw, /\bendsr\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
         if (kwRange) blockRanges.push(new vscode.Range(i, kwRange.start.character, i, kwRange.end.character));
         for (let s = stack.length - 1; s >= 0; s--) {
           if (stack[s].type === 'sr') { stack.splice(s, 1); break; }
@@ -615,12 +632,25 @@ class RpgHighlighter implements vscode.Disposable {
     if (!editor) return;
     const doc = editor.document;
     const sel = editor.selection.active;
-    const line = doc.lineAt(sel.line).text;
-    const low = stripCommentsAndSequence(line).trim().toLowerCase();
+    const rawLine = doc.lineAt(sel.line).text;
+    const low = stripCommentsAndSequence(rawLine).trim().toLowerCase();
     const patterns = buildPatterns(true);
 
-    // Only proceed if cursor on a block keyword (start or end or else)
-    const isBlockKeyword = patterns.if.test(low) || patterns.do.test(low) || patterns.for.test(low) || patterns.select.test(low) || patterns.begsr && patterns.begsr.test(low) || patterns.else.test(low) || patterns.elseif.test(low) || patterns.endif.test(low) || patterns.enddo.test(low) || patterns.endfor.test(low) || (patterns.endsl && patterns.endsl.test(low)) || (patterns.endsr && patterns.endsr.test(low));
+  const onlyCol26 = getColumn26Setting();
+  const ifKeyword = !!findKeywordRange(rawLine, /\bif(?:eq|ne|gt|ge|lt|le)?\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
+  const doKeyword = !!findKeywordRange(rawLine, /\bdo\b|\bdow\b|\bdou\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
+  const forKeyword = !!findKeywordRange(rawLine, /\bfor\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
+  const selectKeyword = !!findKeywordRange(rawLine, /\bselect\b|\bcase(?:eq|ne|gt|ge|lt|le)?\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
+  const srKeyword = !!findKeywordRange(rawLine, /\bBEGSR\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
+  const elseKeyword = !!findKeywordRange(rawLine, /\belseif\b|\belse\b|\bx\d{2}\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
+  const endifKeyword = !!findKeywordRange(rawLine, /\bendif\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
+  const enddoKeyword = !!findKeywordRange(rawLine, /\benddo\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
+  const endforKeyword = !!findKeywordRange(rawLine, /\bendfor\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
+  const endslKeyword = !!findKeywordRange(rawLine, /\bendsl\b|\bendcs\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
+  const endsrKeyword = !!findKeywordRange(rawLine, /\bendsr\b/i, onlyCol26 ? KEYWORD_COLUMN_INDEX : undefined);
+
+  // Only proceed if cursor on a block keyword (start or end or else)
+  const isBlockKeyword = ifKeyword || doKeyword || forKeyword || selectKeyword || srKeyword || elseKeyword || endifKeyword || enddoKeyword || endforKeyword || endslKeyword || endsrKeyword;
     if (!isBlockKeyword) {
       // clear matches (both blue and else-match)
       editor.setDecorations(this.matchDecoration!, []);
@@ -636,22 +666,22 @@ class RpgHighlighter implements vscode.Disposable {
     const lineText = low;
     let searchType: string | undefined;
     let forward = true;
-    if (patterns.if.test(lineText)) { searchType = 'if'; forward = true; }
-    else if (patterns.do.test(lineText) || patterns.dow.test(lineText) || patterns.dou.test(lineText)) { searchType = 'do'; forward = true; }
-    else if (patterns.for.test(lineText)) { searchType = 'for'; forward = true; }
-    else if (patterns.select && patterns.select.test(lineText)) { searchType = 'select'; forward = true; }
-    else if (patterns.begsr && patterns.begsr.test(lineText)) { searchType = 'sr'; forward = true; }
-    else if (patterns.endif.test(lineText)) { searchType = 'if'; forward = false; }
-    else if (patterns.enddo.test(lineText)) { searchType = 'do'; forward = false; }
-    else if (patterns.endfor.test(lineText)) { searchType = 'for'; forward = false; }
-    else if (patterns.endsl && patterns.endsl.test(lineText)) { searchType = 'select'; forward = false; }
-    else if (patterns.endsr && patterns.endsr.test(lineText)) { searchType = 'sr'; forward = false; }
-    else if (patterns.else.test(lineText) || patterns.elseif.test(lineText) || /\bx\d{2}\b/.test(lineText)) {
+    if (ifKeyword) { searchType = 'if'; forward = true; }
+    else if (doKeyword) { searchType = 'do'; forward = true; }
+    else if (forKeyword) { searchType = 'for'; forward = true; }
+    else if (selectKeyword) { searchType = 'select'; forward = true; }
+    else if (srKeyword) { searchType = 'sr'; forward = true; }
+    else if (endifKeyword) { searchType = 'if'; forward = false; }
+    else if (enddoKeyword) { searchType = 'do'; forward = false; }
+    else if (endforKeyword) { searchType = 'for'; forward = false; }
+    else if (endslKeyword) { searchType = 'select'; forward = false; }
+    else if (endsrKeyword) { searchType = 'sr'; forward = false; }
+    else if (elseKeyword) {
       // else: find enclosing if (search backwards)
       searchType = 'if'; forward = false;
     }
 
-    const isElseSelected = (patterns.else.test(lineText) || patterns.elseif.test(lineText) || /\bx\d{2}\b/.test(lineText));
+    const isElseSelected = elseKeyword;
 
     if (!searchType) return;
 
@@ -765,11 +795,12 @@ class RpgHighlighter implements vscode.Disposable {
 }
 
 // Trova il range della prima occorrenza della regex nella linea grezza raw.
-function findKeywordRange(raw: string, re: RegExp): vscode.Range | undefined {
-  const m = re.exec(raw);
-  if (!m) return undefined;
-  const start = m.index;
-  const end = start + m[0].length;
+function findKeywordRange(raw: string, re: RegExp, requiredColumn?: number): vscode.Range | undefined {
+  const match = re.exec(raw);
+  if (!match) return undefined;
+  if (typeof requiredColumn === 'number' && match.index !== requiredColumn) return undefined;
+  const start = match.index;
+  const end = start + match[0].length;
   return new vscode.Range(0, start, 0, end);
 }
 

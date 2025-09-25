@@ -17,13 +17,15 @@ Questa estensione per VS Code è pensata per sorgenti RPG/RPGLE in formato fixed
 - **Evidenziazione delle keyword correlate**:
       - Se selezioni una riga con IF, ELSE, ENDIF, tutte le linee correlate (IF, ENDIF, tutte le ELSE/ELSEIF/Xnn del blocco) vengono evidenziate
 - **Colorazione della sintassi**:
-      - Parole chiave di blocco (IF, DO, SELECT, BEGSR, ecc.) evidenziate in giallo senape
-      - ELSE/ELSEIF/Xnn evidenziate in arancione
-      - CALL e CALLP evidenziate in viola.
+      - Parole chiave di blocco (IF, DO, SELECT, BEGSR, ecc.) evidenziate in giallo senape **solo se la keyword inizia esattamente alla colonna 26** (fisso RPG)
+      - ELSE/ELSEIF/Xnn evidenziate in arancione **solo se la keyword inizia esattamente alla colonna 26**
+      - CALL e CALLP evidenziate in viola **solo se la keyword inizia esattamente alla colonna 26**
       Il colore è personalizzabile tramite impostazioni
 - **Pin/unpin**: puoi "pinnare" un blocco per mantenere l'evidenziazione anche cambiando selezione
 
 **Nota**: L'estensione è pensata per RPG/RPGLE fixed-format. L'uso su sorgenti free-format non è raccomandato: il parser è basato su pattern e non garantisce risultati affidabili su codice free.
+
+**Importante**: tramite l’impostazione `rpgFolding.highlight.onlyColumn26` puoi scegliere se la colorazione delle keyword avviene **solo** se la parola chiave inizia esattamente alla colonna 26 (indice 25, contando da 0), oppure ovunque sia trovata nella riga. Default: solo colonna 26.
 
 Supporta i linguaggi `rpg` e `rpgle` e utilizza le freccette native di VS Code per comprimere/espandere i blocchi.
 
@@ -38,6 +40,7 @@ Supporta i linguaggi `rpg` e `rpgle` e utilizza le freccette native di VS Code p
 - `rpgFolding.highlight.matchLineColor`: colore di sfondo per le righe di inizio/fine blocco evidenziate.
 - `rpgFolding.highlight.matchElseLineColor`: colore di sfondo per le righe ELSE evidenziate.
 - `rpgFolding.highlight.callColor`: colore per la keyword CALL/CALLP (default viola). Solo la parola chiave viene colorata, non la riga intera.
+- `rpgFolding.highlight.onlyColumn26` (boolean, default `true`): se attivo, le keyword vengono colorate **solo** se iniziano esattamente alla colonna 26 (indice 25). Se disattivo, la colorazione avviene ovunque la keyword sia trovata nella riga.
 
 
 ## Esempio
@@ -70,6 +73,7 @@ Il folding è disponibile su IF/ENDIF, DO/ENDDO, FOR/ENDFOR, SELECT/ENDSL, BEGSR
 
 - Il parser è intenzionalmente leggero e basato su pattern: potrebbe non coprire tutte le varianti o peculiarità del linguaggio. In caso di falsi positivi/negativi, apri una issue con un esempio minimo.
 - L'estensione non definisce un grammar o colorazione per `rpg`/`rpgle`. Si appoggia alle definizioni di linguaggio già fornite dal tuo ambiente. Assicurati di avere un'estensione che riconosca questi linguaggi o definisci tu stesso un `files.associations`.
+- L'interfaccia (configurazioni, comandi) è disponibile in italiano e inglese; se la lingua non è riconosciuta, viene usato l'inglese.
 
 ## Licenza
 
@@ -93,13 +97,15 @@ This VS Code extension is designed for RPG/RPGLE sources in fixed-format. It pro
 - **Highlighting of related keywords**:
       - When you select a line with IF, ELSE, or ENDIF, all related lines (IF, ENDIF, all ELSE/ELSEIF/Xnn in the block) are highlighted
 - **Syntax highlighting**:
-      - Block keywords (IF, DO, SELECT, BEGSR, etc.) highlighted in mustard yellow
-      - ELSE/ELSEIF/Xnn highlighted in orange
-      - CALL and CALLP highlighted in purple.
+      - Block keywords (IF, DO, SELECT, BEGSR, etc.) highlighted in mustard yellow **only if the keyword starts exactly at column 26** (fixed-format RPG)
+      - ELSE/ELSEIF/Xnn highlighted in orange **only if the keyword starts exactly at column 26**
+      - CALL and CALLP highlighted in purple **only if the keyword starts exactly at column 26**
       The color is customizable via settings
 - **Pin/unpin**: you can pin a block to keep it highlighted even when changing selection
 
 **Note**: The extension is intended for RPG/RPGLE fixed-format. Usage on free-format sources is not recommended: the parser is pattern-based and does not guarantee reliable results on free-format code.
+
+**Important**: with the `rpgFolding.highlight.onlyColumn26` setting you can choose whether keyword highlighting occurs **only** if the keyword starts exactly at column 26 (index 25, zero-based), or anywhere the keyword is found in the line. Default: only column 26.
 
 Supports the `rpg` and `rpgle` languages and uses VS Code's native folding arrows to collapse/expand blocks.
 
@@ -112,6 +118,7 @@ Supports the `rpg` and `rpgle` languages and uses VS Code's native folding arrow
 - `rpgFolding.highlight.matchLineColor`: background color for highlighted start/end block lines.
 - `rpgFolding.highlight.matchElseLineColor`: background color for highlighted ELSE lines.
 - `rpgFolding.highlight.callColor`: color for the CALL/CALLP keyword (default purple). Only the keyword is colored, not the whole line.
+- `rpgFolding.highlight.onlyColumn26` (boolean, default `true`): if enabled, keywords are highlighted **only** if they start exactly at column 26 (index 25). If disabled, highlighting occurs anywhere the keyword is found in the line.
 
 
 ## Example
@@ -144,3 +151,4 @@ Folding is available for IF/ENDIF, DO/ENDDO, FOR/ENDFOR, SELECT/ENDSL, BEGSR/END
 
 - The parser is intentionally lightweight and pattern-based: it may not cover all language variants or peculiarities. If you find false positives/negatives, open an issue with a minimal example.
 - The extension does not define a grammar or coloring for `rpg`/`rpgle`. It relies on language definitions already provided by your environment. Make sure you have an extension that recognizes these languages or define your own `files.associations`.
+- The UI (configuration, commands) is available in Italian and English; if the language cannot be resolved, English is used as fallback.

@@ -1,0 +1,17 @@
+{
+  "extension.displayName": "Folding blocchi RPG/RPGLE",
+  "extension.description": "Estensione che riconosce e rende comprimibili i blocchi logici in RPG e RPGLE, come IF/ENDIF (tutte le varianti di IF), DO/ENDDO, BEGSR/ENDSR e altro ancora.",
+  "config.title": "RPG Folding",
+  "config.enableFreeForm.description": "Abilita il fallback per il free-form (deprecato). Usa un'altra estensione per il folding di RPGLE free-form.",
+  "config.colorPickerInfo.markdownDescription": "Apri il [selettore colori](https://www.google.com/search?q=selettore+colori) per scegliere un colore, quindi incolla il codice hex nelle impostazioni dell'estensione.",
+  "config.colorPickerInfo.description": "Informazione: apre un link esterno per ottenere un codice colore hex da incollare nelle impostazioni.",
+  "config.highlight.enable.description": "Abilita l'evidenziazione persistente delle keyword dei blocchi RPG (inizio/fine/else).",
+  "config.highlight.blockKeywordColor.description": "Colore hex utilizzato per le keyword di blocco (inizio/fine). Default: giallo senape.",
+  "config.highlight.elseColor.description": "Colore hex utilizzato per le linee ELSE/ELSEIF. Default: arancione chiaro.",
+  "config.highlight.matchLineColor.description": "Colore di sfondo utilizzato per evidenziare le linee di inizio/fine corrispondenti quando il cursore è su una keyword di blocco (azzurro traslucido).",
+  "config.highlight.matchElseLineColor.description": "Colore di sfondo utilizzato per evidenziare le linee ELSE/ELSEIF del relativo IF (arancione traslucido).",
+  "config.highlight.callColor.description": "Colore utilizzato per la keyword CALL/CALLP (foreground, viola di default).",
+  "config.highlight.onlyColumn26.description": "Se true, le keyword vengono evidenziate solo se iniziano esattamente alla colonna 26 (indice 25). Se false, l'evidenziazione avviene ovunque la keyword compaia sulla riga.",
+  "command.pinBlockHighlight.title": "Fissa evidenziazione blocco",
+  "command.unpinBlockHighlight.title": "Rimuovi evidenziazione fissata"
+}

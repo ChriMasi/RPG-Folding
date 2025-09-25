@@ -1,8 +1,8 @@
 {
   "name": "vscode-rpg-folding",
-  "displayName": "RPG/RPGLE Block Folding",
-  "description": "Extension that recognizes and makes foldable logic blocks in RPG and RPGLE, such as IF/ENDIF (all types of IF), DO/ENDDO, BEGSR/ENDSR, and more.",
-  "version": "0.1.0",
+  "displayName": "%extension.displayName%",
+  "description": "%extension.description%",
+  "version": "0.1.1",
   "publisher": "Chri-Masi",
   "license": "MIT",
   "engines": {
@@ -30,47 +30,52 @@
       }
     ],
     "configuration": {
-      "title": "RPG Folding",
+      "title": "%config.title%",
       "properties": {
         "rpgFolding.enableFreeFormFallback": {
           "type": "boolean",
           "default": false,
-          "description": "Enable free-form fallback, deprecated use another extension for free-form RPGLE folding."
+          "description": "%config.enableFreeForm.description%"
         },
         "rpgFolding.highlight.colorPickerInfo": {
           "type": "null",
-          "markdownDescription": "Accedi al [selettore colori](https://www.google.com/search?q=selettore+colori) per selezionare un colore; poi incolla il codice hex nelle impostazioni colore dell'estensione.",
-          "description": "Informazione: apre un link esterno per ottenere un codice colore hex da incollare nelle impostazioni."
+          "markdownDescription": "%config.colorPickerInfo.markdownDescription%",
+          "description": "%config.colorPickerInfo.description%"
         },
         "rpgFolding.highlight.enable": {
           "type": "boolean",
           "default": true,
-          "description": "Enable persistent highlighting of RPG block keywords (start/end/else)."
+          "description": "%config.highlight.enable.description%"
         },
         "rpgFolding.highlight.blockKeywordColor": {
           "type": "string",
           "default": "#C79C00",
-          "description": "Color used for block keywords (start/end) in hex. Default: mustard yellow."
+          "description": "%config.highlight.blockKeywordColor.description%"
         },
         "rpgFolding.highlight.elseColor": {
           "type": "string",
           "default": "#FA9134",
-          "description": "Color used for ELSE/ELSEIF lines in hex. Default: light orange."
+          "description": "%config.highlight.elseColor.description%"
         },
         "rpgFolding.highlight.matchLineColor": {
           "type": "string",
           "default": "#89CFF0",
-          "description": "Color used to highlight matching start/end lines when the cursor is on a block keyword (light translucent blue)."
+          "description": "%config.highlight.matchLineColor.description%"
         },
         "rpgFolding.highlight.matchElseLineColor": {
           "type": "string",
           "default": "#FFB74D",
-          "description": "Color used to highlight ELSE/ELSEIF lines of the matched IF when the cursor is on that IF (light translucent orange)."
+          "description": "%config.highlight.matchElseLineColor.description%"
         },
         "rpgFolding.highlight.callColor": {
           "type": "string",
           "default": "#CF79F7",
-          "description": "Colore per la keyword CALL/CALLP (foreground, viola di default)"
+          "description": "%config.highlight.callColor.description%"
+        },
+        "rpgFolding.highlight.onlyColumn26": {
+          "type": "boolean",
+          "default": true,
+          "description": "%config.highlight.onlyColumn26.description%"
         }
       }
     }
@@ -78,11 +83,11 @@
     "commands": [
       {
         "command": "rpgFolding.pinBlockHighlight",
-        "title": "Pin block highlight"
+        "title": "%command.pinBlockHighlight.title%"
       },
       {
         "command": "rpgFolding.unpinBlockHighlight",
-        "title": "Unpin block highlight"
+        "title": "%command.unpinBlockHighlight.title%"
       }
     ],
     "menus": {

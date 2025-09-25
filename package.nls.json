@@ -1,0 +1,17 @@
+{
+  "extension.displayName": "RPG/RPGLE Block Folding",
+  "extension.description": "Extension that recognizes and makes foldable logic blocks in RPG and RPGLE, such as IF/ENDIF (all types of IF), DO/ENDDO, BEGSR/ENDSR, and more.",
+  "config.title": "RPG Folding",
+  "config.enableFreeForm.description": "Enable free-form fallback (deprecated). Use another extension for free-form RPGLE folding.",
+  "config.colorPickerInfo.markdownDescription": "Open the [color picker](https://www.google.com/search?q=color+picker) to choose a color, then paste the hex code into the extension settings.",
+  "config.colorPickerInfo.description": "Info: opens an external link to obtain a hex color code to paste into the settings.",
+  "config.highlight.enable.description": "Enable persistent highlighting of RPG block keywords (start/end/else).",
+  "config.highlight.blockKeywordColor.description": "Hex color used for block keywords (start/end). Default: mustard yellow.",
+  "config.highlight.elseColor.description": "Hex color used for ELSE/ELSEIF lines. Default: light orange.",
+  "config.highlight.matchLineColor.description": "Background color used to highlight matching start/end lines when the cursor is on a block keyword (light translucent blue).",
+  "config.highlight.matchElseLineColor.description": "Background color used to highlight ELSE/ELSEIF lines of the matched IF (light translucent orange).",
+  "config.highlight.callColor.description": "Color used for the CALL/CALLP keyword (foreground, default purple).",
+  "config.highlight.onlyColumn26.description": "When true, keywords are highlighted only if they start exactly at column 26 (index 25). When false, highlighting occurs wherever the keyword appears on the line.",
+  "command.pinBlockHighlight.title": "Pin block highlight",
+  "command.unpinBlockHighlight.title": "Unpin block highlight"
+}
